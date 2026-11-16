@@ -35,7 +35,7 @@ export function ReviewPanel({ t, update, onSubmitBid }: { t: Tender; update: Upd
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-12">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
       <Panel className="xl:col-span-5">
         <PanelTitle title="Submission readiness" />
         <ul className="flex flex-col gap-2">

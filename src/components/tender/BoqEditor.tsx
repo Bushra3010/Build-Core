@@ -14,6 +14,12 @@ type Update = (mutate: (t: Tender) => void, log?: string) => void;
 const STARTER = ["Preliminaries", "Substructure", "Superstructure", "Finishes", "MEP Services"];
 const letter = (i: number) => String.fromCharCode(65 + (i % 26));
 
+/** Next free item code in a section, e.g. B.4 — never reuses a code after deletions. */
+function nextCode(s: BoqSection) {
+  const used = s.items.map((i) => Number(i.code.split(".").pop()) || 0);
+  return `${s.code}.${Math.max(0, ...used) + 1}`;
+}
+
 export function BoqEditor({ t, editable, update }: { t: Tender; editable: boolean; update: Update }) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [libOpen, setLibOpen] = useState(false);
@@ -32,7 +38,7 @@ export function BoqEditor({ t, editable, update }: { t: Tender; editable: boolea
   const addItem = (sid: string) =>
     update((x) => {
       const s = x.boq.find((s) => s.id === sid)!;
-      s.items.push({ id: uid(), code: `${s.code}.${s.items.length + 1}`, description: "", unit: "m3", qty: 0, rates: { material: 0, labour: 0, equipment: 0, subcontract: 0 } });
+      s.items.push({ id: uid(), code: nextCode(s), description: "", unit: "m3", qty: 0, rates: { material: 0, labour: 0, equipment: 0, subcontract: 0 } });
     });
 
   const setSection = (sid: string, patch: Partial<BoqSection>) =>
@@ -133,7 +139,7 @@ export function BoqEditor({ t, editable, update }: { t: Tender; editable: boolea
       {t.boq.map((s) => {
         const isCollapsed = collapsed[s.id];
         return (
-          <Panel key={s.id} className="p-0 sm:p-0">
+          <Panel key={s.id} className="p-0 sm:p-0" testId={`boq-section-${s.code}`}>
             <div className="flex flex-wrap items-center gap-3 px-4 py-4 sm:px-5">
               <button
                 onClick={() => setCollapsed((c) => ({ ...c, [s.id]: !c[s.id] }))}
@@ -191,7 +197,7 @@ export function BoqEditor({ t, editable, update }: { t: Tender; editable: boolea
                       {s.items.map((i) => {
                         const unpriced = unitRate(i.rates) <= 0 || i.qty <= 0;
                         return (
-                          <tr key={i.id} className="border-t border-white/[0.04]">
+                          <tr key={i.id} data-testid={`boq-row-${i.code}`} className="border-t border-white/[0.04]">
                             <td className="px-1 py-1">
                               <input className={cellInputCls} value={i.code} disabled={!editable} onChange={(e) => setItem(s.id, i.id, (x) => void (x.code = e.target.value))} aria-label="Item code" />
                             </td>
@@ -279,20 +285,23 @@ export function BoqEditor({ t, editable, update }: { t: Tender; editable: boolea
         </div>
       </Panel>
 
-      <LibraryPicker
-        open={libOpen}
-        onClose={() => setLibOpen(false)}
-        sections={t.boq}
-        onAdd={(sid, rates) => {
-          update((x) => {
-            const s = x.boq.find((b) => b.id === sid)!;
-            for (const r of rates) {
-              s.items.push({ id: uid(), code: `${s.code}.${s.items.length + 1}`, description: r.description, unit: r.unit, qty: 0, rates: { ...r.rates } });
-            }
-          }, `Added ${rates.length} item(s) from rate library`);
-          setLibOpen(false);
-        }}
-      />
+      {/* Mounted only while open, so search and selection start fresh each time. */}
+      {libOpen && (
+        <LibraryPicker
+          open
+          onClose={() => setLibOpen(false)}
+          sections={t.boq}
+          onAdd={(sid, rates) => {
+            update((x) => {
+              const s = x.boq.find((b) => b.id === sid)!;
+              for (const r of rates) {
+                s.items.push({ id: uid(), code: nextCode(s), description: r.description, unit: r.unit, qty: 0, rates: { ...r.rates } });
+              }
+            }, `Added ${rates.length} item(s) from rate library`);
+            setLibOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

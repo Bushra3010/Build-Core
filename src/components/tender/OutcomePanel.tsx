@@ -20,7 +20,7 @@ export function OutcomePanel({ t, update }: { t: Tender; update: Update }) {
 
   if (t.status === "submitted") {
     return (
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Panel>
           <PanelTitle title="Record outcome" />
           <div className="grid gap-4 sm:grid-cols-2">
@@ -74,7 +74,7 @@ export function OutcomePanel({ t, update }: { t: Tender; update: Update }) {
     const project = projects.find((p) => p.code === t.projectCode);
     const items = allItems(t);
     return (
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Panel>
           <PanelTitle title={project ? "Project created" : "Hand off to planning"} />
           {project ? (

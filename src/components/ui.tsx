@@ -6,9 +6,9 @@ import { ArrowUpRight, X } from "lucide-react";
 import { cn, initials } from "@/lib/format";
 import type { TenderStatus } from "@/lib/types";
 
-export function Panel({ className, children }: { className?: string; children: React.ReactNode }) {
+export function Panel({ className, children, testId }: { className?: string; children: React.ReactNode; testId?: string }) {
   return (
-    <section className={cn("rounded-[28px] border border-white/[0.06] bg-panel/85 p-5 sm:p-6 backdrop-blur", className)}>
+    <section data-testid={testId} className={cn("min-w-0 rounded-[28px] border border-white/[0.06] bg-panel/85 p-5 sm:p-6 backdrop-blur", className)}>
       {children}
     </section>
   );

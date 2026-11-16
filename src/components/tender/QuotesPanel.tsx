@@ -43,7 +43,7 @@ export function QuotesPanel({ t, editable, update }: { t: Tender; editable: bool
     .filter((g) => g.quotes.length);
 
   return (
-    <div className="grid gap-6 xl:grid-cols-12">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
       {editable && (
         <Panel className="xl:col-span-4">
           <PanelTitle title="Record a quote" />
