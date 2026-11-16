@@ -109,7 +109,8 @@ test("seeded tenders open on the right step for their status", async ({ page }) 
 test("rate library edits, deletes and demo reset", async ({ page }) => {
   await page.goto("./rates/");
   const rows = page.locator("table tbody tr");
-  const before = await rows.count();
+  await expect(rows).toHaveCount(22); // wait for the seeded library before counting
+  const before = 22;
   await page.getByRole("button", { name: "Add rate" }).click();
   await expect(rows).toHaveCount(before + 1);
   const last = rows.last();
